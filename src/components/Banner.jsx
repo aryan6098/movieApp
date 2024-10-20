@@ -1,28 +1,38 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { bannerImageMiddleware } from "../store/bannerMiddleware";
 
 const Banner = () => {
+  const { bannerImage, bannerImageTitle, loading, error } = useSelector(
+    (state) => state.bannerData
+  );
 
-    const [bannerImage, setBannerImage] = useState("");
-    const [title,setTitle] = useState("")
+  const dispatch = useDispatch();
   useEffect(() => {
-    axios.get('https://api.themoviedb.org/3/trending/movie/day?api_key=f53917176284f9516f5fe1073eb186b4')
-    .then((response)=>{
-        const firstMovie = response.data.results[0];
-        const firstMovieTitle = firstMovie.title;
-        const firstMoviePoster = firstMovie.backdrop_path;
-        setBannerImage(`https://image.tmdb.org/t/p/original${firstMoviePoster}`)
-        setTitle(firstMovieTitle)
-    })
+    dispatch(bannerImageMiddleware());
   }, []);
+
+  if (loading) {
+    return <h3>...Loading</h3>;
+  }
+  if (error) {
+    return (
+      <>
+        <h3>Error occurred</h3>
+      </>
+    );
+  }
   return (
     <div
       className="h-[20vh] md:h-[75vh] bg-cover bg-center flex items-end"
       style={{
-        backgroundImage: `url(${bannerImage})`,
+        backgroundImage: `url(https://image.tmdb.org/t/p/original${bannerImage})`,
       }}
     >
-      <div className="text-white w-full text-center text-2xl">{title}</div>
+      <div className="text-white w-full text-center text-2xl">
+        {bannerImageTitle}
+      </div>
     </div>
   );
 };
